@@ -69,7 +69,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p>
 <p style="margin:10px 0 0;font-weight:700">Can you beat my time?</p>
 </div>
-<p style="font-size:.9rem">Save the card as a PNG, then attach it to your post. The buttons open a draft; choose the downloaded image before posting.</p>
+<p style="font-size:.9rem">Save the card as a PNG. The X and Reddit buttons download it and open a post draft; attach the image from Downloads before posting.</p>
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepe the Frog figure and drag it into the pond.</p>
@@ -238,35 +238,46 @@ c.fillText("Can you beat my time?",600,760);
 return new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(Error("PNG export failed")),"image/png"));
 }
 
-resultBtn.addEventListener("click",async()=>{
-if(finishAt===null)return;
+async function saveResultCard(successMessage="Result card downloaded as pepe-the-frog-rescue-result.png. Check your Downloads folder."){
+if(finishAt===null)return false;
 resultBtn.disabled=true;
+shareXBtn.disabled=true;
+shareRedditBtn.disabled=true;
 try{
 let blob=await resultBlob();
 let url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="pepe-the-frog-rescue-result.png";
 document.body.appendChild(a);a.click();a.remove();
 setTimeout(()=>URL.revokeObjectURL(url),10000);
-statusEl.textContent="Result card downloaded as pepe-the-frog-rescue-result.png. Check your Downloads folder.";
-}catch(_){statusEl.textContent="Could not create the result image. Please try again.";}
-finally{resultBtn.disabled=finishAt===null;}
-});
+statusEl.textContent=successMessage;
+return true;
+}catch(_){statusEl.textContent="Could not create the result image. Please try again.";return false;}
+finally{
+resultBtn.disabled=finishAt===null;
+shareXBtn.disabled=finishAt===null;
+shareRedditBtn.disabled=finishAt===null;
+}
+}
+
+resultBtn.addEventListener("click",()=>saveResultCard());
 
 function openShareDraft(url,network){
-if(finishAt===null)return;
+if(finishAt===null)return false;
 let popup=window.open(url,"_blank");
 if(popup)popup.opener=null;
-statusEl.textContent=network+" post opened in a new tab if pop-ups are allowed. Attach pepe-the-frog-rescue-result.png from Downloads before posting.";
+return !!popup;
 }
 
 shareXBtn.addEventListener("click",()=>{
 let text=encodeURIComponent("I rescued all 100 Pepe the Frog figures! Can you beat my time?");
 let url=encodeURIComponent(location.href);
-openShareDraft("https://twitter.com/intent/tweet?text="+text+"&url="+url,"X");
+let opened=openShareDraft("https://twitter.com/intent/tweet?text="+text+"&url="+url,"X");
+saveResultCard(opened?"Result PNG downloaded. Attach it from Downloads to your X post before posting.":"Result PNG downloaded. Allow pop-ups for this site to open X, then attach the image from Downloads.");
 });
 
 shareRedditBtn.addEventListener("click",()=>{
-openShareDraft("https://www.reddit.com/submit/","Reddit");
+let opened=openShareDraft("https://www.reddit.com/submit/","Reddit");
+saveResultCard(opened?"Result PNG downloaded. Choose an image post on Reddit and attach it from Downloads.":"Result PNG downloaded. Allow pop-ups for this site to open Reddit, then choose an image post and attach it from Downloads.");
 });
 
 function tick(){if(startAt!==null&&finishAt===null)hud();requestAnimationFrame(tick);}
