@@ -131,7 +131,7 @@ ctx.fillStyle=g;ctx.fillRect(0,p.y-p.ry*1.8,W,p.ry*3.6);
 ctx.fillStyle="#f6a642";ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx,p.ry,0,0,Math.PI*2);ctx.fill();
 ctx.fillStyle="#ffd27d";ctx.beginPath();ctx.ellipse(p.x,p.y-4,p.rx*.91,p.ry*.72,0,0,Math.PI*2);ctx.fill();
 ctx.strokeStyle="#fff0c2";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx*.96,p.ry*.86,0,0,Math.PI*2);ctx.stroke();
-ctx.fillStyle="#7c4a16";ctx.font="800 13px system-ui";ctx.textAlign="center";ctx.fillText("WARM POND",p.x,p.y-p.ry-9);
+ctx.fillStyle="#7c4a16";ctx.font="800 13px system-ui";ctx.textAlign="center";ctx.fillText("WARM POND",p.x,p.y+p.ry+14);
 let rs=pepes.filter(q=>q.rescued),cols=Math.max(6,Math.floor(W/32)),rows=Math.ceil(TOTAL/cols),cw=p.rx*1.58/cols,ch=p.ry*1.08/rows;
 rs.forEach((q,i)=>{ctx.font=Math.max(9,Math.min(16,ch*1.25))+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textBaseline="middle";ctx.fillText("🐸",p.x-p.rx*.79+cw*((i%cols)+.5),p.y-p.ry*.52+ch*(Math.floor(i/cols)+.5));});
 }
