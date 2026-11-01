@@ -59,7 +59,8 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 
 <div id="resultPreview" style="display:none;margin:20px auto;max-width:600px;text-align:center">
 <h2 style="font-size:1.1rem">Your result card</h2>
-<div style="box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
+<div style="position:relative;box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
+<span id="cardNumber" aria-label="Collectible motif 01" style="position:absolute;top:10px;right:14px;font-size:.72rem;font-weight:800;letter-spacing:.08em;opacity:.62">01</span>
 <div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPE THE FROG<br>RESCUE CHALLENGE</div>
 <p style="margin:14px 0 8px">🐸 🐸 🐸 🐸 🐸 🐸 🐸</p>
 <div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div>
@@ -76,8 +77,8 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 
 <script>
 (()=>{"use strict";
-const TOTAL=100,canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest");
+const TOTAL=100,CARD_NUMBER="01",canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber");
 if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
 let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
 
@@ -199,6 +200,7 @@ drag=null;layout();hud();draw();
 function showResultPreview(){
 cardTime.textContent=fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed());
 cardBest.textContent=best===null?"—":fmt(best);
+cardNumberEl.textContent=CARD_NUMBER;
 resultPreview.style.display="block";
 }
 
@@ -221,6 +223,7 @@ g.addColorStop(0,"#dff5ff");g.addColorStop(1,"#fff0ce");
 c.fillStyle=g;c.fillRect(0,0,1200,800);
 c.fillStyle="#17445a";c.textAlign="center";c.font="800 54px system-ui";
 c.fillText("PEPE THE FROG RESCUE CHALLENGE",600,120);
+c.textAlign="right";c.fillStyle="#537183";c.font="700 24px system-ui";c.fillText(CARD_NUMBER,1140,72);c.textAlign="center";
 c.font="30px system-ui";c.fillText("100 Pepe the Frog figures rescued from the ice!",600,185);
 c.fillStyle="#f5b24f";c.beginPath();c.ellipse(600,370,320,130,0,0,Math.PI*2);c.fill();
 c.fillStyle="#ffe0a0";c.beginPath();c.ellipse(600,350,290,95,0,0,Math.PI*2);c.fill();
