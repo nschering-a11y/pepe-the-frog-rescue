@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#dff5ff">
+<title>Pepe the Frog Rescue Challenge</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#17324a;background:linear-gradient(#eaf9ff,#c9eaf6)}
+body{padding:clamp(9px,3vw,22px)}
+main{width:min(100%,920px);margin:auto}
+header{text-align:center}
+h1{font-size:clamp(1.3rem,4.6vw,2.15rem);margin:0 0 6px}
+.sub{margin:0;font-size:.94rem}
+.hud{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:13px 0 10px}
+.stat{background:#ffffffdf;border:1px solid white;border-radius:13px;padding:7px 13px;min-width:94px;text-align:center}
+.stat span{display:block;font-size:.75rem;opacity:.75}
+.stat strong{font-size:1.1rem;font-variant-numeric:tabular-nums}
+.stage{overflow:hidden;border:2px solid white;border-radius:18px;box-shadow:0 8px 25px #245b701c;background:#dff4fc}
+canvas{display:block;width:100%;height:clamp(430px,66vh,640px);min-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+canvas:active{cursor:grabbing}
+.hint,.status,.foot{text-align:center}
+.hint{font-size:.92rem;margin:10px 0}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:13px 0 7px}
+button{border:0;border-radius:999px;padding:12px 17px;min-height:45px;font:700 1rem system-ui,sans-serif;background:#12566b;color:white;box-shadow:0 3px 0 #083b4c;cursor:pointer}
+button.alt{background:white;color:#17415a;border:1px solid #b8d9e7;box-shadow:0 3px 0 #a4c9d9}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
+.status{min-height:1.4em;font-weight:650;margin:8px 0}
+.foot{font-size:.79rem;opacity:.72;max-width:680px;margin:12px auto}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>❄️ PEPE THE FROG RESCUE CHALLENGE 🐸</h1>
+<p class="sub">Rescue all 100 Pepe the Frog figures from the ice and bring them to the warm pond!</p>
+</header>
+
+<section class="hud" aria-label="Game score">
+<div class="stat"><span>Rescued</span><strong id="count">0 / 100</strong></div>
+<div class="stat"><span>Time</span><strong id="time">00:00.0</strong></div>
+<div class="stat"><span>Best Time</span><strong id="best">—</strong></div>
+</section>
+
+<div class="stage">
+<canvas id="game" aria-label="Drag Pepe the Frog figures into the warm pond"></canvas>
+</div>
+
+<p class="hint">Drag a Pepe the Frog figure into the orange pond. The timer starts only when you actually move a Pepe.</p>
+
+<div class="actions">
+<button class="alt" id="reset" type="button">Restart</button>
+<button id="result" type="button" disabled>Save / Share Result</button>
+</div>
+
+<div id="resultPreview" style="display:none;margin:20px auto;max-width:600px;text-align:center">
+<h2 style="font-size:1.1rem">Your result card</h2>
+<div style="box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
+<div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPE THE FROG<br>RESCUE CHALLENGE</div>
+<p style="margin:14px 0 8px">🐸 🐸 🐸 🐸 🐸 🐸 🐸</p>
+<div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div>
+<div style="font-weight:700">MY RESCUE TIME</div>
+<p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p>
+<p style="margin:10px 0 0;font-weight:700">Can you beat my time?</p>
+</div>
+<p style="font-size:.9rem">Your result is shown above. Tap “Save / Share Result” to save or share it as an image.</p>
+</div>
+
+<p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepe the Frog figure and drag it into the pond.</p>
+<p class="foot">Free to play · No sign-up · Your best time is saved on this device if your browser allows local storage.</p>
+</main>
+
+<script>
+(()=>{"use strict";
+const TOTAL=100,canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest");
+if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
+let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
+
+function readBest(){try{let n=Number(localStorage.getItem("pepeRescueBestMs"));return Number.isFinite(n)&&n>0?n:null;}catch(_){return null;}}
+function saveBest(n){try{localStorage.setItem("pepeRescueBestMs",String(Math.round(n)));}catch(_){}}
+function fmt(ms){if(ms==null||!Number.isFinite(ms)||ms<0)ms=0;let t=Math.floor(ms/100),m=Math.floor(t/600),s=Math.floor(t%600/10),d=t%10;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+d;}
+function elapsed(){return startAt===null?0:(finishAt===null?performance.now():finishAt)-startAt;}
+function pond(){return{x:W/2,y:H*.81,rx:W*.43,ry:H*.135};}
+function insidePond(x,y){let p=pond(),dx=(x-p.x)/p.rx,dy=(y-p.y)/p.ry;return dx*dx+dy*dy<.9;}
+
+function layout(){
+let margin=Math.max(17,Math.min(28,W*.055)),top=Math.max(42,H*.095),bottom=H*.575;
+pepes.forEach((p,i)=>{
+if(p.rescued||(drag&&drag.id===i))return;
+let row=Math.floor(i/10),col=i%10;
+p.homeX=margin+col/9*(W-2*margin);
+p.homeY=top+row/9*(bottom-top);
+p.x=p.homeX+Math.sin(i*2.17)*Math.min(4,W*.008);
+p.y=p.homeY+Math.cos(i*1.73)*2.5;
+});
+}
+function init(){pepes=Array.from({length:TOTAL},(_,id)=>({id,x:0,y:0,homeX:0,homeY:0,rescued:false}));layout();}
+
+function resize(){
+let r=canvas.getBoundingClientRect();W=Math.max(280,r.width);H=Math.max(430,r.height);
+dpr=Math.min(2.5,devicePixelRatio||1);
+canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+ctx.setTransform(dpr,0,0,dpr,0,0);layout();draw();
+}
+
+function background(){
+let g=ctx.createLinearGradient(0,0,0,H);
+g.addColorStop(0,"#c6eafa");g.addColorStop(.65,"#eaf8ff");g.addColorStop(1,"#f5fcff");
+ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.fillStyle="#a7d7eb";ctx.beginPath();
+ctx.moveTo(0,H*.3);ctx.lineTo(W*.15,H*.16);ctx.lineTo(W*.31,H*.31);ctx.lineTo(W*.51,H*.12);ctx.lineTo(W*.72,H*.3);ctx.lineTo(W*.88,H*.17);ctx.lineTo(W,H*.28);ctx.lineTo(W,H*.62);ctx.lineTo(0,H*.62);ctx.fill();
+ctx.fillStyle="#f8fdff";ctx.beginPath();
+ctx.moveTo(0,H*.34);ctx.lineTo(W*.15,H*.16);ctx.lineTo(W*.31,H*.31);ctx.lineTo(W*.51,H*.12);ctx.lineTo(W*.72,H*.3);ctx.lineTo(W*.88,H*.17);ctx.lineTo(W,H*.28);ctx.lineTo(W,H*.4);ctx.lineTo(0,H*.44);ctx.fill();
+ctx.fillStyle="#d8f1fb";ctx.fillRect(0,H*.36,W,H*.34);
+for(let i=0;i<12;i++){let x=(i*83+17)%W,y=H*(.38+((i*37)%25)/100);ctx.strokeStyle="#b4deee";ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+8,y+13);ctx.lineTo(x+3,y+23);ctx.stroke();}
+ctx.fillStyle="#427c93";ctx.font="700 12px system-ui";ctx.textAlign="center";ctx.fillText("ICE FIELD",W/2,18);
+}
+
+function drawPond(){
+let p=pond(),g=ctx.createRadialGradient(p.x,p.y,5,p.x,p.y,p.rx*1.15);
+g.addColorStop(0,"#ffe2a2");g.addColorStop(1,"#ffb44f00");
+ctx.fillStyle=g;ctx.fillRect(0,p.y-p.ry*1.8,W,p.ry*3.6);
+ctx.fillStyle="#f6a642";ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx,p.ry,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle="#ffd27d";ctx.beginPath();ctx.ellipse(p.x,p.y-4,p.rx*.91,p.ry*.72,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle="#fff0c2";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx*.96,p.ry*.86,0,0,Math.PI*2);ctx.stroke();
+ctx.fillStyle="#7c4a16";ctx.font="800 13px system-ui";ctx.textAlign="center";ctx.fillText("WARM POND",p.x,p.y-p.ry-9);
+let rs=pepes.filter(q=>q.rescued),cols=Math.max(6,Math.floor(W/32)),rows=Math.ceil(TOTAL/cols),cw=p.rx*1.58/cols,ch=p.ry*1.08/rows;
+rs.forEach((q,i)=>{ctx.font=Math.max(9,Math.min(16,ch*1.25))+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textBaseline="middle";ctx.fillText("🐸",p.x-p.rx*.79+cw*((i%cols)+.5),p.y-p.ry*.52+ch*(Math.floor(i/cols)+.5));});
+}
+
+function drawPepe(p){
+let size=Math.max(16,Math.min(25,W*.062));
+if(drag&&drag.id===p.id){ctx.save();ctx.shadowColor="#12485c66";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(p.x,p.y,size*.65,0,Math.PI*2);ctx.fillStyle="#ffffffaa";ctx.fill();ctx.restore();}
+ctx.font=size+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🐸",p.x,p.y);
+}
+
+function draw(){
+if(!W||!H)return;ctx.clearRect(0,0,W,H);background();drawPond();
+pepes.forEach(p=>{if(!p.rescued&&!(drag&&drag.id===p.id))drawPepe(p);});
+if(drag)drawPepe(pepes[drag.id]);
+if(startAt===null&&finishAt===null){ctx.fillStyle="#17324acc";ctx.font="700 13px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("DRAG ME TO THE POND!",W/2,H*.64);}
+}
+
+function hud(){
+let n=pepes.filter(p=>p.rescued).length;
+countEl.textContent=n+" / "+TOTAL;timeEl.textContent=fmt(elapsed());bestEl.textContent=best===null?"—":fmt(best);
+resultBtn.disabled=finishAt===null;
+if(finishAt===null){resultPreview.style.display="none";}else{showResultPreview();}
+}
+function pos(e){let r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function hit(x,y){
+let out=null,bd=Infinity,rad=Math.max(18,Math.min(25,W*.065));
+for(let p of pepes){if(p.rescued)continue;let d=(x-p.x)**2+(y-p.y)**2;if(d<rad*rad&&d<bd){out=p;bd=d;}}
+return out;
+}
+
+canvas.addEventListener("pointerdown",e=>{
+if(finishAt!==null||drag)return;
+let q=pos(e),p=hit(q.x,q.y);if(!p)return;
+e.preventDefault();drag={id:p.id,sx:q.x,sy:q.y,moved:false};
+try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+draw();
+},{passive:false});
+
+canvas.addEventListener("pointermove",e=>{
+if(!drag)return;
+let q=pos(e),p=pepes[drag.id];
+if(!drag.moved&&Math.hypot(q.x-drag.sx,q.y-drag.sy)>=5){
+drag.moved=true;if(startAt===null)startAt=performance.now();
+statusEl.textContent="Keep going! Bring all the Pepe the Frog figures to the warm pond.";
+}
+if(drag.moved){p.x=q.x;p.y=q.y;}draw();
+},{passive:false});
+
+function endDrag(e){
+if(!drag)return;
+let d=drag,p=pepes[d.id],q=pos(e);
+if(d.moved){
+p.x=q.x;p.y=q.y;
+if(insidePond(q.x,q.y)){
+p.rescued=true;let n=pepes.filter(x=>x.rescued).length;
+if(n===TOTAL){
+finishAt=performance.now();let ms=finishAt-startAt;
+if(best===null||ms<best){best=ms;saveBest(ms);statusEl.textContent="Amazing! All 100 Pepe the Frog figures rescued — new best time!";}
+else statusEl.textContent="You did it! All 100 Pepe the Frog figures are rescued.";
+}else statusEl.textContent=n+" of 100 rescued. Keep going!";
+}else{p.x=p.homeX;p.y=p.homeY;}
+}else{p.x=p.homeX;p.y=p.homeY;}
+drag=null;layout();hud();draw();
+}
+
+function showResultPreview(){
+cardTime.textContent=fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed());
+cardBest.textContent=best===null?"—":fmt(best);
+resultPreview.style.display="block";
+}
+
+canvas.addEventListener("pointerup",endDrag,{passive:false});
+canvas.addEventListener("pointercancel",()=>{
+if(drag){let p=pepes[drag.id];p.x=p.homeX;p.y=p.homeY;drag=null;layout();draw();}
+},{passive:false});
+
+document.getElementById("reset").addEventListener("click",()=>{
+resultPreview.style.display="none";drag=null;startAt=null;finishAt=null;init();
+statusEl.textContent="Ready? Grab a Pepe the Frog figure and drag it into the pond.";
+hud();draw();
+});
+
+async function resultBlob(){
+let out=document.createElement("canvas");out.width=1200;out.height=800;
+let c=out.getContext("2d");if(!c)throw Error("Canvas unavailable");
+let g=c.createLinearGradient(0,0,1200,800);
+g.addColorStop(0,"#dff5ff");g.addColorStop(1,"#fff0ce");
+c.fillStyle=g;c.fillRect(0,0,1200,800);
+c.fillStyle="#17445a";c.textAlign="center";c.font="800 54px system-ui";
+c.fillText("PEPE THE FROG RESCUE CHALLENGE",600,120);
+c.font="30px system-ui";c.fillText("100 Pepe the Frog figures rescued from the ice!",600,185);
+c.fillStyle="#f5b24f";c.beginPath();c.ellipse(600,370,320,130,0,0,Math.PI*2);c.fill();
+c.fillStyle="#ffe0a0";c.beginPath();c.ellipse(600,350,290,95,0,0,Math.PI*2);c.fill();
+for(let i=0;i<100;i++){c.font='42px "Apple Color Emoji","Segoe UI Emoji",sans-serif';c.fillText("🐸",360+(i%10)*53,285+Math.floor(i/10)*18);}
+c.fillStyle="#17324a";c.font="800 88px system-ui";
+c.fillText(fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed()),600,600);
+c.font="30px system-ui";c.fillText("My Rescue Time",600,650);
+c.font="24px system-ui";c.fillText("Best Time: "+(best===null?"—":fmt(best)),600,715);
+c.fillText("Can you beat my time?",600,760);
+return new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(Error("PNG export failed")),"image/png"));
+}
+
+resultBtn.addEventListener("click",async()=>{
+if(finishAt===null)return;
+resultBtn.disabled=true;
+try{
+let blob=await resultBlob(),file=new File([blob],"pepe-the-frog-rescue-result.png",{type:"image/png"});
+if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+try{
+await navigator.share({files:[file],title:"Pepe the Frog Rescue Challenge",text:"I rescued all 100 Pepe the Frog figures! Can you beat my time?"});
+statusEl.textContent="Share options opened for your result.";return;
+}catch(err){if(err&&err.name==="AbortError"){statusEl.textContent="Sharing cancelled. You can try again.";return;}}
+}
+let url=URL.createObjectURL(blob),a=document.createElement("a");
+a.href=url;a.download="pepe-the-frog-rescue-result.png";
+document.body.appendChild(a);a.click();a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1500);
+statusEl.textContent="Result image saved. Upload it to X or Reddit!";
+}catch(_){statusEl.textContent="Could not create the result image. Please try again.";}
+finally{resultBtn.disabled=finishAt===null;}
+});
+
+function tick(){if(startAt!==null&&finishAt===null)hud();requestAnimationFrame(tick);}
+init();resize();hud();window.addEventListener("resize",resize,{passive:true});requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
