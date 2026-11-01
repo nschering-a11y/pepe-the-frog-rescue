@@ -53,7 +53,8 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <div class="actions">
 <button class="alt" id="reset" type="button">Restart</button>
 <button id="result" type="button" disabled>Save Result PNG</button>
-<button class="alt" id="shareResult" type="button" disabled>Share Result</button>
+<button class="alt" id="shareX" type="button" disabled>Share on X</button>
+<button class="alt" id="shareReddit" type="button" disabled>Share on Reddit</button>
 </div>
 
 <div id="resultPreview" style="display:none;margin:20px auto;max-width:600px;text-align:center">
@@ -66,7 +67,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p>
 <p style="margin:10px 0 0;font-weight:700">Can you beat my time?</p>
 </div>
-<p style="font-size:.9rem">Save the card as a PNG, or share it with an available app. On a laptop, use “Save Result PNG” and check your Downloads folder.</p>
+<p style="font-size:.9rem">Save the card as a PNG, then attach it to your post. The buttons open a draft; choose the downloaded image before posting.</p>
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepe the Frog figure and drag it into the pond.</p>
@@ -76,7 +77,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <script>
 (()=>{"use strict";
 const TOTAL=100,canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareBtn=document.getElementById("shareResult"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest");
+const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest");
 if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
 let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
 
@@ -149,7 +150,8 @@ function hud(){
 let n=pepes.filter(p=>p.rescued).length;
 countEl.textContent=n+" / "+TOTAL;timeEl.textContent=fmt(elapsed());bestEl.textContent=best===null?"—":fmt(best);
 resultBtn.disabled=finishAt===null;
-shareBtn.disabled=finishAt===null;
+shareXBtn.disabled=finishAt===null;
+shareRedditBtn.disabled=finishAt===null;
 if(finishAt===null){resultPreview.style.display="none";}else{showResultPreview();}
 }
 function pos(e){let r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
@@ -245,19 +247,21 @@ statusEl.textContent="Result card downloaded as pepe-the-frog-rescue-result.png.
 finally{resultBtn.disabled=finishAt===null;}
 });
 
-shareBtn.addEventListener("click",async()=>{
+function openShareDraft(url,network){
 if(finishAt===null)return;
-shareBtn.disabled=true;
-try{
-let blob=await resultBlob(),file=new File([blob],"pepe-the-frog-rescue-result.png",{type:"image/png"});
-if(!navigator.share||!navigator.canShare||!navigator.canShare({files:[file]})){
-statusEl.textContent="Sharing is not available in this browser. Use Save Result PNG, then upload the image to X or Reddit.";return;
+let popup=window.open(url,"_blank");
+if(popup)popup.opener=null;
+statusEl.textContent=network+" post opened in a new tab if pop-ups are allowed. Attach pepe-the-frog-rescue-result.png from Downloads before posting.";
 }
-await navigator.share({files:[file],title:"Pepe the Frog Rescue Challenge",text:"I rescued all 100 Pepe the Frog figures! Can you beat my time?"});
-statusEl.textContent="Share options opened for your result.";
-}catch(err){
-statusEl.textContent=err&&err.name==="AbortError"?"Sharing cancelled. Your result is still available to save.":"Could not open sharing. Use Save Result PNG to download the image.";
-}finally{shareBtn.disabled=finishAt===null;}
+
+shareXBtn.addEventListener("click",()=>{
+let text=encodeURIComponent("I rescued all 100 Pepe the Frog figures! Can you beat my time?");
+let url=encodeURIComponent(location.href);
+openShareDraft("https://twitter.com/intent/tweet?text="+text+"&url="+url,"X");
+});
+
+shareRedditBtn.addEventListener("click",()=>{
+openShareDraft("https://www.reddit.com/submit/","Reddit");
 });
 
 function tick(){if(startAt!==null&&finishAt===null)hud();requestAnimationFrame(tick);}
