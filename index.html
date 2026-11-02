@@ -12,6 +12,7 @@ body{padding:clamp(9px,3vw,22px)}
 main{width:min(100%,920px);margin:auto}
 header{text-align:center}
 h1{font-size:clamp(1.3rem,4.6vw,2.15rem);margin:0 0 6px}
+.pepecoin-logo{width:clamp(32px,6vw,46px);height:auto;vertical-align:middle;border-radius:50%}
 .sub{margin:0;font-size:.94rem}
 .hud{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:13px 0 10px}
 .stat{background:#ffffffdf;border:1px solid white;border-radius:13px;padding:7px 13px;min-width:94px;text-align:center}
@@ -35,7 +36,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <body>
 <main>
 <header>
-<h1>❄️ PEPECOIN RESCUE CHALLENGE 🐸</h1>
+<h1>❄️ <img class="pepecoin-logo" src="./pepecoin-icon.png" alt="Pepecoin logo"> PEPECOIN RESCUE CHALLENGE</h1>
 <p class="sub">Rescue all 100 Pepecoin figures from the ice and bring them to the warm pond!</p>
 </header>
 
@@ -63,7 +64,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <div style="position:relative;box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
 <span id="cardNumber" aria-label="Collectible motif 01" style="position:absolute;top:10px;right:14px;font-size:.72rem;font-weight:800;letter-spacing:.08em;opacity:.62">01</span>
 <div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPECOIN<br>RESCUE CHALLENGE</div>
-<p style="margin:14px 0 8px">🐸 🐸 🐸 🐸 🐸 🐸 🐸</p>
+<p id="cardIcons" aria-label="Pepecoin icons" style="display:flex;justify-content:center;gap:5px;margin:14px 0 8px"></p>
 <div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div>
 <div style="font-weight:700">MY RESCUE TIME</div>
 <p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p>
@@ -80,7 +81,8 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <script>
 (()=>{"use strict";
 const TOTAL=100,CARD_NUMBER="01",canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber");
+const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber"),cardIcons=document.getElementById("cardIcons");
+const pepecoinIcon=new Image();pepecoinIcon.src="./pepecoin-icon.png";
 if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
 let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
 
@@ -90,6 +92,13 @@ function fmt(ms){if(ms==null||!Number.isFinite(ms)||ms<0)ms=0;let t=Math.floor(m
 function elapsed(){return startAt===null?0:(finishAt===null?performance.now():finishAt)-startAt;}
 function pond(){return{x:W/2,y:H*.81,rx:W*.43,ry:H*.135};}
 function insidePond(x,y){let p=pond(),dx=(x-p.x)/p.rx,dy=(y-p.y)/p.ry;return dx*dx+dy*dy<.9;}
+
+function drawPepecoinIcon(target,x,y,size){
+if(pepecoinIcon.complete&&pepecoinIcon.naturalWidth){target.drawImage(pepecoinIcon,x-size/2,y-size/2,size,size);return;}
+target.save();target.beginPath();target.arc(x,y,size*.46,0,Math.PI*2);target.fillStyle="#218f4f";target.fill();target.strokeStyle="#176d3b";target.lineWidth=2;target.stroke();target.fillStyle="#fff";target.font="800 "+(size*.52)+"px system-ui";target.textAlign="center";target.textBaseline="middle";target.fillText("P",x,y);target.restore();
+}
+
+pepecoinIcon.addEventListener("load",()=>{if(W&&H)draw();});
 
 function layout(){
 let margin=Math.max(17,Math.min(28,W*.055)),top=Math.max(42,H*.095),bottom=H*.575;
@@ -133,13 +142,13 @@ ctx.fillStyle="#ffd27d";ctx.beginPath();ctx.ellipse(p.x,p.y-4,p.rx*.91,p.ry*.72,
 ctx.strokeStyle="#fff0c2";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y,p.rx*.96,p.ry*.86,0,0,Math.PI*2);ctx.stroke();
 ctx.fillStyle="#7c4a16";ctx.font="800 13px system-ui";ctx.textAlign="center";ctx.fillText("WARM POND",p.x,p.y+p.ry+14);
 let rs=pepes.filter(q=>q.rescued),cols=Math.max(6,Math.floor(W/32)),rows=Math.ceil(TOTAL/cols),cw=p.rx*1.58/cols,ch=p.ry*1.08/rows;
-rs.forEach((q,i)=>{ctx.font=Math.max(9,Math.min(16,ch*1.25))+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textBaseline="middle";ctx.fillText("🐸",p.x-p.rx*.79+cw*((i%cols)+.5),p.y-p.ry*.52+ch*(Math.floor(i/cols)+.5));});
+rs.forEach((q,i)=>drawPepecoinIcon(ctx,p.x-p.rx*.79+cw*((i%cols)+.5),p.y-p.ry*.52+ch*(Math.floor(i/cols)+.5),Math.max(11,Math.min(16,ch*1.25))));
 }
 
 function drawPepe(p){
 let size=Math.max(16,Math.min(25,W*.062));
 if(drag&&drag.id===p.id){ctx.save();ctx.shadowColor="#12485c66";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(p.x,p.y,size*.65,0,Math.PI*2);ctx.fillStyle="#ffffffaa";ctx.fill();ctx.restore();}
-ctx.font=size+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🐸",p.x,p.y);
+drawPepecoinIcon(ctx,p.x,p.y,size);
 }
 
 function draw(){
@@ -203,6 +212,7 @@ function showResultPreview(){
 cardTime.textContent=fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed());
 cardBest.textContent=best===null?"—":fmt(best);
 cardNumberEl.textContent=CARD_NUMBER;
+if(!cardIcons.childElementCount){for(let i=0;i<7;i++){let img=document.createElement("img");img.src="./pepecoin-icon.png";img.alt="";img.width=28;img.height=28;img.style.borderRadius="50%";cardIcons.appendChild(img);}}
 resultPreview.style.display="block";
 }
 
@@ -218,6 +228,7 @@ hud();draw();
 });
 
 async function resultBlob(){
+if(!pepecoinIcon.complete||!pepecoinIcon.naturalWidth)await new Promise((resolve,reject)=>{pepecoinIcon.addEventListener("load",resolve,{once:true});pepecoinIcon.addEventListener("error",()=>reject(Error("Pepecoin icon unavailable")),{once:true});});
 let out=document.createElement("canvas");out.width=1200;out.height=800;
 let c=out.getContext("2d");if(!c)throw Error("Canvas unavailable");
 let g=c.createLinearGradient(0,0,1200,800);
@@ -229,7 +240,7 @@ c.textAlign="right";c.fillStyle="#537183";c.font="700 24px system-ui";c.fillText
 c.font="30px system-ui";c.fillText("100 Pepecoin figures rescued from the ice!",600,185);
 c.fillStyle="#f5b24f";c.beginPath();c.ellipse(600,370,320,130,0,0,Math.PI*2);c.fill();
 c.fillStyle="#ffe0a0";c.beginPath();c.ellipse(600,350,290,95,0,0,Math.PI*2);c.fill();
-for(let i=0;i<100;i++){c.font='42px "Apple Color Emoji","Segoe UI Emoji",sans-serif';c.fillText("🐸",360+(i%10)*53,285+Math.floor(i/10)*18);}
+for(let i=0;i<100;i++)drawPepecoinIcon(c,360+(i%10)*53,285+Math.floor(i/10)*18,38);
 c.fillStyle="#17324a";c.font="800 88px system-ui";
 c.fillText(fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed()),600,600);
 c.font="30px system-ui";c.fillText("My Rescue Time",600,650);
@@ -286,4 +297,3 @@ init();resize();hud();window.addEventListener("resize",resize,{passive:true});re
 </script>
 </body>
 </html>
-
