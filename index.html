@@ -102,7 +102,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 (()=>{"use strict";
 const TOTAL=100,CARD_NUMBER="01",canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 // Add the Supabase project URL and public publishable key after running supabase-schema.sql.
-const SUPABASE_URL="",SUPABASE_PUBLISHABLE_KEY="";
+const SUPABASE_URL="https://dwobbjpdgsbwnzvhhehf.supabase.co",SUPABASE_PUBLISHABLE_KEY="sb_publishable_KHmKC7x1DnDXttrcnGDpvg_K6g87dps";
 const leaderStatus=document.getElementById("leaderStatus"),leaderList=document.getElementById("leaderList"),leaderForm=document.getElementById("leaderForm"),nicknameInput=document.getElementById("nickname"),submitScoreBtn=document.getElementById("submitScore");
 const sbReady=Boolean(SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY);
 const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber"),cardIcons=document.getElementById("cardIcons");
