@@ -31,6 +31,13 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 .status{min-height:1.4em;font-weight:650;margin:8px 0}
 .foot{font-size:.79rem;opacity:.72;max-width:680px;margin:12px auto}
 .foot a{color:#12566b;font-weight:700}
+.leaderboard{max-width:680px;margin:28px auto 18px;padding:20px;background:#ffffffd9;border:1px solid #fff;border-radius:18px;box-shadow:0 8px 25px #245b701c}
+.leaderboard h2{margin:0 0 5px;text-align:center}.leaderboard p{margin:8px 0;text-align:center}
+.leader-form{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.leader-form input{min-height:45px;padding:9px 12px;border:1px solid #9bbdca;border-radius:10px;font:inherit;max-width:100%}
+.leader-form[hidden]{display:none}.leader-note{font-size:.82rem;opacity:.78}
+.leaderboard ol{padding-left:2.2rem;margin:12px 0 0}.leaderboard li{padding:7px 8px;border-bottom:1px solid #dcecf1;display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.leaderboard li span:last-child{font-weight:800;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -73,6 +80,19 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <p style="font-size:.9rem">Save the card as a PNG. The X and Reddit buttons download it and open a post draft; attach the image from Downloads before posting.</p>
 </div>
 
+<section class="leaderboard" aria-labelledby="leaderTitle">
+<h2 id="leaderTitle">Global Top 100</h2>
+<p id="leaderStatus" role="status" aria-live="polite">Leaderboard not configured yet.</p>
+<form class="leader-form" id="leaderForm" hidden>
+<label for="nickname">Your nickname</label>
+<input id="nickname" name="nickname" minlength="2" maxlength="20" autocomplete="nickname" required placeholder="2–20 characters">
+<button type="submit" id="submitScore">Submit my time</button>
+</form>
+<p class="leader-note">Your nickname and best time will be public. Please don’t use your real name. Times are self-reported and may be cheated.</p>
+<ol id="leaderList" aria-label="Global leaderboard"></ol>
+<div class="actions"><button class="alt" id="refreshLeaderboard" type="button">Refresh leaderboard</button></div>
+</section>
+
 <p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepecoin figure and drag it into the pond.</p>
 <p class="foot">Free to play · No sign-up · Your best time is saved on this device if your browser allows local storage.</p>
 <p class="foot"><a href="https://pepecoin.com/" target="_blank" rel="noopener noreferrer">Learn more about Pepecoin at pepecoin.com</a></p>
@@ -81,6 +101,10 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <script>
 (()=>{"use strict";
 const TOTAL=100,CARD_NUMBER="01",canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+// Add the Supabase project URL and public publishable key after running supabase-schema.sql.
+const SUPABASE_URL="",SUPABASE_PUBLISHABLE_KEY="";
+const leaderStatus=document.getElementById("leaderStatus"),leaderList=document.getElementById("leaderList"),leaderForm=document.getElementById("leaderForm"),nicknameInput=document.getElementById("nickname"),submitScoreBtn=document.getElementById("submitScore");
+const sbReady=Boolean(SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY);
 const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber"),cardIcons=document.getElementById("cardIcons");
 const pepecoinIcon=new Image();pepecoinIcon.src="./pepecoin-icon.png";
 if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
@@ -88,6 +112,14 @@ let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
 
 function readBest(){try{let n=Number(localStorage.getItem("pepeRescueBestMs"));return Number.isFinite(n)&&n>0?n:null;}catch(_){return null;}}
 function saveBest(n){try{localStorage.setItem("pepeRescueBestMs",String(Math.round(n)));}catch(_){}}
+function sbHeaders(token){let h={apikey:SUPABASE_PUBLISHABLE_KEY,"Content-Type":"application/json"};if(token)h.Authorization="Bearer "+token;return h;}
+async function sbRequest(path,options={}){let r=await fetch(SUPABASE_URL.replace(/\/$/,"")+path,{...options,headers:{...sbHeaders(options.token),...(options.headers||{})}});let body=await r.text();let data=body?JSON.parse(body):null;if(!r.ok)throw Error(data?.msg||data?.message||data?.error_description||data?.error||"Supabase request failed ("+r.status+")");return data;}
+function readSession(){try{return JSON.parse(localStorage.getItem("pepeRescueSupabaseSession")||"null");}catch(_){return null;}}
+function writeSession(s){try{localStorage.setItem("pepeRescueSupabaseSession",JSON.stringify(s));}catch(_){}}
+async function getSession(){let s=readSession();if(s?.access_token&&s.expires_at>Date.now()+60000)return s;if(s?.refresh_token){let r=await sbRequest("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})});r.expires_at=Date.now()+(r.expires_in||3600)*1000;writeSession(r);return r;}let r=await sbRequest("/auth/v1/signup",{method:"POST",body:JSON.stringify({})});if(!r.access_token)throw Error("Anonymous sign-in did not return a session. Enable anonymous sign-ins in Supabase.");r.expires_at=Date.now()+(r.expires_in||3600)*1000;writeSession(r);return r;}
+function formatScore(ms){return fmt(ms);}
+async function loadLeaderboard(){if(!sbReady){leaderStatus.textContent="Leaderboard not configured yet. Add your Supabase URL and publishable key to index.html.";return;}leaderStatus.textContent="Loading leaderboard…";try{let rows=await sbRequest("/rest/v1/rescue_scores?select=nickname,best_time_ms&order=best_time_ms.asc,updated_at.asc,nickname.asc&limit=100");leaderList.replaceChildren();rows.forEach((row,i)=>{let li=document.createElement("li"),name=document.createElement("span"),time=document.createElement("span");name.textContent=(i+1)+". "+row.nickname;time.textContent=formatScore(row.best_time_ms);li.append(name,time);leaderList.appendChild(li);});leaderStatus.textContent=rows.length?"Fastest 100 rescue times":"No scores yet — be the first!";}catch(e){leaderStatus.textContent="Could not load leaderboard: "+e.message;}}
+async function submitLeaderboardScore(event){event.preventDefault();if(!sbReady||finishAt===null)return;let nickname=nicknameInput.value.trim(),time=Math.round(finishAt-startAt);if(nickname.length<2||nickname.length>20){leaderStatus.textContent="Nickname must be 2–20 characters.";return;}submitScoreBtn.disabled=true;leaderStatus.textContent="Submitting your time…";try{let session=await getSession();await sbRequest("/rest/v1/rpc/submit_rescue_score",{method:"POST",token:session.access_token,body:JSON.stringify({p_nickname:nickname,p_time_ms:time})});leaderStatus.textContent="Your time was submitted!";leaderForm.hidden=true;await loadLeaderboard();}catch(e){leaderStatus.textContent="Could not submit score: "+e.message;}finally{submitScoreBtn.disabled=false;}}
 function fmt(ms){if(ms==null||!Number.isFinite(ms)||ms<0)ms=0;let t=Math.floor(ms/100),m=Math.floor(t/600),s=Math.floor(t%600/10),d=t%10;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+d;}
 function elapsed(){return startAt===null?0:(finishAt===null?performance.now():finishAt)-startAt;}
 function pond(){return{x:W/2,y:H*.81,rx:W*.43,ry:H*.135};}
@@ -164,7 +196,7 @@ countEl.textContent=n+" / "+TOTAL;timeEl.textContent=fmt(elapsed());bestEl.textC
 resultBtn.disabled=finishAt===null;
 shareXBtn.disabled=finishAt===null;
 shareRedditBtn.disabled=finishAt===null;
-if(finishAt===null){resultPreview.style.display="none";}else{showResultPreview();}
+if(finishAt===null){resultPreview.style.display="none";leaderForm.hidden=true;}else{showResultPreview();if(sbReady)leaderForm.hidden=false;}
 }
 function pos(e){let r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function hit(x,y){
@@ -226,6 +258,8 @@ resultPreview.style.display="none";drag=null;startAt=null;finishAt=null;init();
 statusEl.textContent="Ready? Grab a Pepecoin figure and drag it into the pond.";
 hud();draw();
 });
+leaderForm.addEventListener("submit",submitLeaderboardScore);
+document.getElementById("refreshLeaderboard").addEventListener("click",loadLeaderboard);
 
 async function resultBlob(){
 if(!pepecoinIcon.complete||!pepecoinIcon.naturalWidth)await new Promise((resolve,reject)=>{pepecoinIcon.addEventListener("load",resolve,{once:true});pepecoinIcon.addEventListener("error",()=>reject(Error("Pepecoin icon unavailable")),{once:true});});
@@ -292,8 +326,9 @@ saveResultCard(opened?"Result PNG downloaded as pepecoin-rescue-result.png. Choo
 });
 
 function tick(){if(startAt!==null&&finishAt===null)hud();requestAnimationFrame(tick);}
-init();resize();hud();window.addEventListener("resize",resize,{passive:true});requestAnimationFrame(tick);
+init();resize();hud();loadLeaderboard();window.addEventListener("resize",resize,{passive:true});requestAnimationFrame(tick);
 })();
 </script>
 </body>
 </html>
+
