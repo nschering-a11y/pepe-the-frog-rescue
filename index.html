@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#dff5ff">
-<title>Pepe the Frog Rescue Challenge</title>
+<title>Pepecoin Rescue Challenge</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#17324a;background:linear-gradient(#eaf9ff,#c9eaf6)}
@@ -35,8 +35,8 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <body>
 <main>
 <header>
-<h1>❄️ PEPE THE FROG RESCUE CHALLENGE 🐸</h1>
-<p class="sub">Rescue all 100 Pepe the Frog figures from the ice and bring them to the warm pond!</p>
+<h1>❄️ PEPECOIN RESCUE CHALLENGE 🐸</h1>
+<p class="sub">Rescue all 100 Pepecoin figures from the ice and bring them to the warm pond!</p>
 </header>
 
 <section class="hud" aria-label="Game score">
@@ -46,10 +46,10 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 </section>
 
 <div class="stage">
-<canvas id="game" aria-label="Drag Pepe the Frog figures into the warm pond"></canvas>
+<canvas id="game" aria-label="Drag Pepecoin figures into the warm pond"></canvas>
 </div>
 
-<p class="hint">Drag a Pepe the Frog figure into the orange pond. The timer starts only when you actually move a Pepe.</p>
+<p class="hint">Drag a Pepecoin figure into the orange pond. The timer starts only when you actually move one.</p>
 
 <div class="actions">
 <button class="alt" id="reset" type="button">Restart</button>
@@ -62,7 +62,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <h2 style="font-size:1.1rem">Your result card</h2>
 <div style="position:relative;box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
 <span id="cardNumber" aria-label="Collectible motif 01" style="position:absolute;top:10px;right:14px;font-size:.72rem;font-weight:800;letter-spacing:.08em;opacity:.62">01</span>
-<div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPE THE FROG<br>RESCUE CHALLENGE</div>
+<div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPECOIN<br>RESCUE CHALLENGE</div>
 <p style="margin:14px 0 8px">🐸 🐸 🐸 🐸 🐸 🐸 🐸</p>
 <div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div>
 <div style="font-weight:700">MY RESCUE TIME</div>
@@ -72,7 +72,7 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <p style="font-size:.9rem">Save the card as a PNG. The X and Reddit buttons download it and open a post draft; attach the image from Downloads before posting.</p>
 </div>
 
-<p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepe the Frog figure and drag it into the pond.</p>
+<p class="status" id="status" role="status" aria-live="polite">Ready? Grab a Pepecoin figure and drag it into the pond.</p>
 <p class="foot">Free to play · No sign-up · Your best time is saved on this device if your browser allows local storage.</p>
 <p class="foot"><a href="https://pepecoin.com/" target="_blank" rel="noopener noreferrer">Learn more about Pepecoin at pepecoin.com</a></p>
 </main>
@@ -177,7 +177,7 @@ if(!drag)return;
 let q=pos(e),p=pepes[drag.id];
 if(!drag.moved&&Math.hypot(q.x-drag.sx,q.y-drag.sy)>=5){
 drag.moved=true;if(startAt===null)startAt=performance.now();
-statusEl.textContent="Keep going! Bring all the Pepe the Frog figures to the warm pond.";
+statusEl.textContent="Keep going! Bring all the Pepecoin figures to the warm pond.";
 }
 if(drag.moved){p.x=q.x;p.y=q.y;}draw();
 },{passive:false});
@@ -191,8 +191,8 @@ if(insidePond(q.x,q.y)){
 p.rescued=true;let n=pepes.filter(x=>x.rescued).length;
 if(n===TOTAL){
 finishAt=performance.now();let ms=finishAt-startAt;
-if(best===null||ms<best){best=ms;saveBest(ms);statusEl.textContent="Amazing! All 100 Pepe the Frog figures rescued — new best time!";}
-else statusEl.textContent="You did it! All 100 Pepe the Frog figures are rescued.";
+if(best===null||ms<best){best=ms;saveBest(ms);statusEl.textContent="Amazing! All 100 Pepecoin figures rescued — new best time!";}
+else statusEl.textContent="You did it! All 100 Pepecoin figures are rescued.";
 }else statusEl.textContent=n+" of 100 rescued. Keep going!";
 }else{p.x=p.homeX;p.y=p.homeY;}
 }else{p.x=p.homeX;p.y=p.homeY;}
@@ -213,7 +213,7 @@ if(drag){let p=pepes[drag.id];p.x=p.homeX;p.y=p.homeY;drag=null;layout();draw();
 
 document.getElementById("reset").addEventListener("click",()=>{
 resultPreview.style.display="none";drag=null;startAt=null;finishAt=null;init();
-statusEl.textContent="Ready? Grab a Pepe the Frog figure and drag it into the pond.";
+statusEl.textContent="Ready? Grab a Pepecoin figure and drag it into the pond.";
 hud();draw();
 });
 
@@ -224,9 +224,9 @@ let g=c.createLinearGradient(0,0,1200,800);
 g.addColorStop(0,"#dff5ff");g.addColorStop(1,"#fff0ce");
 c.fillStyle=g;c.fillRect(0,0,1200,800);
 c.fillStyle="#17445a";c.textAlign="center";c.font="800 54px system-ui";
-c.fillText("PEPE THE FROG RESCUE CHALLENGE",600,120);
+c.fillText("PEPECOIN RESCUE CHALLENGE",600,120);
 c.textAlign="right";c.fillStyle="#537183";c.font="700 24px system-ui";c.fillText(CARD_NUMBER,1140,72);c.textAlign="center";
-c.font="30px system-ui";c.fillText("100 Pepe the Frog figures rescued from the ice!",600,185);
+c.font="30px system-ui";c.fillText("100 Pepecoin figures rescued from the ice!",600,185);
 c.fillStyle="#f5b24f";c.beginPath();c.ellipse(600,370,320,130,0,0,Math.PI*2);c.fill();
 c.fillStyle="#ffe0a0";c.beginPath();c.ellipse(600,350,290,95,0,0,Math.PI*2);c.fill();
 for(let i=0;i<100;i++){c.font='42px "Apple Color Emoji","Segoe UI Emoji",sans-serif';c.fillText("🐸",360+(i%10)*53,285+Math.floor(i/10)*18);}
@@ -238,7 +238,7 @@ c.fillText("Can you beat my time?",600,760);
 return new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(Error("PNG export failed")),"image/png"));
 }
 
-async function saveResultCard(successMessage="Result card downloaded as pepe-the-frog-rescue-result.png. Check your Downloads folder."){
+async function saveResultCard(successMessage="Result card downloaded as pepecoin-rescue-result.png. Check your Downloads folder."){
 if(finishAt===null)return false;
 resultBtn.disabled=true;
 shareXBtn.disabled=true;
@@ -246,7 +246,7 @@ shareRedditBtn.disabled=true;
 try{
 let blob=await resultBlob();
 let url=URL.createObjectURL(blob),a=document.createElement("a");
-a.href=url;a.download="pepe-the-frog-rescue-result.png";
+a.href=url;a.download="pepecoin-rescue-result.png";
 document.body.appendChild(a);a.click();a.remove();
 setTimeout(()=>URL.revokeObjectURL(url),10000);
 statusEl.textContent=successMessage;
@@ -269,15 +269,15 @@ return !!popup;
 }
 
 shareXBtn.addEventListener("click",()=>{
-let text=encodeURIComponent("I rescued all 100 Pepe the Frog figures! Can you beat my time?");
+let text=encodeURIComponent("I rescued all 100 Pepecoin figures! Can you beat my time?");
 let url=encodeURIComponent(location.href);
 let opened=openShareDraft("https://twitter.com/intent/tweet?text="+text+"&url="+url,"X");
-saveResultCard(opened?"Result PNG downloaded. Attach it from Downloads to your X post before posting.":"Result PNG downloaded. Allow pop-ups for this site to open X, then attach the image from Downloads.");
+saveResultCard(opened?"Result PNG downloaded as pepecoin-rescue-result.png. Attach it from Downloads to your X post before posting.":"Result PNG downloaded as pepecoin-rescue-result.png. Allow pop-ups for this site to open X, then attach the image from Downloads.");
 });
 
 shareRedditBtn.addEventListener("click",()=>{
 let opened=openShareDraft("https://www.reddit.com/submit/","Reddit");
-saveResultCard(opened?"Result PNG downloaded. Choose an image post on Reddit and attach it from Downloads.":"Result PNG downloaded. Allow pop-ups for this site to open Reddit, then choose an image post and attach it from Downloads.");
+saveResultCard(opened?"Result PNG downloaded as pepecoin-rescue-result.png. Choose an image post on Reddit and attach it from Downloads.":"Result PNG downloaded as pepecoin-rescue-result.png. Allow pop-ups for this site to open Reddit, then choose an image post and attach it from Downloads.");
 });
 
 function tick(){if(startAt!==null&&finishAt===null)hud();requestAnimationFrame(tick);}
