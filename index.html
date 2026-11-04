@@ -66,19 +66,11 @@ button:focus-visible{outline:3px solid #ff9d35;outline-offset:3px}
 <button class="alt" id="shareReddit" type="button" disabled>Share on Reddit</button>
 </div>
 
-<div id="resultPreview" style="display:none;margin:20px auto;max-width:600px;text-align:center">
-<h2 style="font-size:1.1rem">Your result card</h2>
-<div style="position:relative;box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18">
-<span id="cardNumber" aria-label="Collectible motif 01" style="position:absolute;top:10px;right:14px;font-size:.72rem;font-weight:800;letter-spacing:.08em;opacity:.62">01</span>
-<div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPECOIN<br>RESCUE CHALLENGE</div>
-<p id="cardIcons" aria-label="Pepecoin icons" style="display:flex;justify-content:center;gap:5px;margin:14px 0 8px"></p>
-<div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div>
-<div style="font-weight:700">MY RESCUE TIME</div>
-<p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p>
-<p style="margin:10px 0 0;font-weight:700">Can you beat my time?</p>
-</div>
-<p style="font-size:.9rem">Save the card as a PNG. The X and Reddit buttons download it and open a post draft; attach the image from Downloads before posting.</p>
-</div>
+<div id="resultPreview" style="display:none;margin:20px auto;max-width:760px;text-align:center">
+<h2 style="font-size:1.1rem">Your result card</h2><div class="card-picker" role="group" aria-label="Choose a collectible result card"><button class="alt" id="chooseCard01" type="button" aria-pressed="false">Card 01 · Ice Rescue</button><button id="chooseCard02" type="button" aria-pressed="true">Card 02 · Ice to Pond</button></div>
+<div id="cardV1" style="display:none;position:relative;box-sizing:border-box;padding:26px 16px;border:2px solid #c7e2ed;border-radius:18px;background:linear-gradient(135deg,#dff5ff,#fff0ce);color:#17445a;box-shadow:0 8px 24px #17445a18"><span id="cardNumber" aria-label="Collectible motif 01" style="position:absolute;top:10px;right:14px;font-size:.72rem;font-weight:800;letter-spacing:.08em;opacity:.62">01</span><div style="font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;line-height:1.2">PEPECOIN<br>RESCUE CHALLENGE</div><p id="cardIcons" aria-label="Pepecoin icons" style="display:flex;justify-content:center;gap:5px;margin:14px 0 8px"></p><div style="font-size:clamp(2.8rem,12vw,4.5rem);font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums" id="cardTime">00:00.0</div><div style="font-weight:700">MY RESCUE TIME</div><p style="margin:14px 0 0">Best time: <strong id="cardBest">—</strong></p><p style="margin:10px 0 0;font-weight:700">Can you beat my time?</p></div>
+<div id="cardV2" style="display:none;position:relative;overflow:hidden;aspect-ratio:3/2;border:4px solid #f5e6b7;border-radius:18px;background:#155b9b;box-shadow:0 8px 24px #17445a30;color:#fff;text-align:left"><img src="./pepecoin-card-02.png" alt="Pepecoin figures emerge from an icy sea and race toward a warm pond" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><div style="position:absolute;top:3%;right:2%;width:48%;padding:2.5%;border:2px solid #efc83e;border-radius:18px;background:#071b60ef;box-shadow:0 3px 10px #06194d88;text-align:center;line-height:1.12"><div style="font-size:clamp(.52rem,2.1vw,1rem);font-weight:900"><span style="display:inline-block;background:#f4d641;color:#0b205d;border-radius:8px;padding:2px 7px">02</span> &nbsp; PEPECOIN RESCUE CHALLENGE</div><div style="margin-top:2%;font-size:clamp(.8rem,3.5vw,1.65rem);font-weight:1000;font-style:italic;color:#ffe33c;text-shadow:1px 2px #9c4a00">MISSION COMPLETE!</div><div style="margin:1% auto 2%;width:92%;padding:1% 0;border-radius:8px;background:#f5d43e;color:#092264;font-size:clamp(.52rem,2.3vw,1.1rem);font-weight:950">100 PEPECOINS RESCUED</div><div id="cardTime2" style="font-size:clamp(1.5rem,6.7vw,3.2rem);font-weight:1000;line-height:1;font-variant-numeric:tabular-nums;text-shadow:1px 2px #17324a">00:00.0</div><div style="font-size:clamp(.55rem,2.4vw,1.15rem);font-weight:850;letter-spacing:.04em">YOUR RESCUE TIME</div><div style="display:inline-block;margin-top:2%;padding:1% 5%;border:2px solid #f2d33e;border-radius:999px;font-size:clamp(.5rem,2vw,.95rem);font-weight:800">Best time: <span id="cardBest2">—</span></div></div><div style="position:absolute;bottom:2%;left:11%;right:11%;padding:1.2% 2%;border:2px solid #e1bd43;border-radius:999px;background:#061d49ed;text-align:center;font-size:clamp(.55rem,2.3vw,1.05rem);font-weight:850"><span>Can you beat my time?</span> &nbsp; | &nbsp; <span id="cardUrl2">pepecoin-rescue-challenge.pages.dev</span></div></div>
+<p style="font-size:.9rem">Save the card as a PNG. The X and Reddit buttons download it and open a post draft; attach the image from Downloads before posting.</p></div>
 
 <section class="leaderboard" aria-labelledby="leaderTitle">
 <h2 id="leaderTitle">Global Top 100</h2>
@@ -105,7 +97,7 @@ const TOTAL=100,CARD_NUMBER="01",canvas=document.getElementById("game"),ctx=canv
 const SUPABASE_URL="https://dwobbjpdgsbwnzvhhehf.supabase.co",SUPABASE_PUBLISHABLE_KEY="sb_publishable_KHmKC7x1DnDXttrcnGDpvg_K6g87dps";
 const leaderStatus=document.getElementById("leaderStatus"),leaderList=document.getElementById("leaderList"),leaderForm=document.getElementById("leaderForm"),nicknameInput=document.getElementById("nickname"),submitScoreBtn=document.getElementById("submitScore");
 const sbReady=Boolean(SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY);
-const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber"),cardIcons=document.getElementById("cardIcons");
+const countEl=document.getElementById("count"),timeEl=document.getElementById("time"),bestEl=document.getElementById("best"),statusEl=document.getElementById("status"),resultBtn=document.getElementById("result"),shareXBtn=document.getElementById("shareX"),shareRedditBtn=document.getElementById("shareReddit"),resultPreview=document.getElementById("resultPreview"),cardTime=document.getElementById("cardTime"),cardBest=document.getElementById("cardBest"),cardNumberEl=document.getElementById("cardNumber"),cardIcons=document.getElementById("cardIcons");const cardV1=document.getElementById("cardV1"),cardV2=document.getElementById("cardV2"),cardTime2=document.getElementById("cardTime2"),cardBest2=document.getElementById("cardBest2"),cardUrl2=document.getElementById("cardUrl2"),chooseCard01=document.getElementById("chooseCard01"),chooseCard02=document.getElementById("chooseCard02");let selectedCardVersion="02";
 const pepecoinIcon=new Image();pepecoinIcon.src="./pepecoin-icon.png";
 if(!ctx){statusEl.textContent="Your browser cannot display the game board.";return;}
 let W=0,H=0,dpr=1,pepes=[],drag=null,startAt=null,finishAt=null,best=readBest();
@@ -240,13 +232,14 @@ else statusEl.textContent="You did it! All 100 Pepecoin figures are rescued.";
 drag=null;layout();hud();draw();
 }
 
+function selectResultCard(version){selectedCardVersion=version;cardV1.style.display=version==="01"?"block":"none";cardV2.style.display=version==="02"?"block":"none";chooseCard01.setAttribute("aria-pressed",String(version==="01"));chooseCard02.setAttribute("aria-pressed",String(version==="02"));}
 function showResultPreview(){
-cardTime.textContent=fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed());
-cardBest.textContent=best===null?"—":fmt(best);
-cardNumberEl.textContent=CARD_NUMBER;
+let t=fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed()),bt=best===null?"—":fmt(best);
+cardTime.textContent=t;cardBest.textContent=bt;cardNumberEl.textContent=CARD_NUMBER;cardTime2.textContent=t;cardBest2.textContent=bt;cardUrl2.textContent=location.host;
 if(!cardIcons.childElementCount){for(let i=0;i<7;i++){let img=document.createElement("img");img.src="./pepecoin-icon.png";img.alt="";img.width=28;img.height=28;img.style.borderRadius="50%";cardIcons.appendChild(img);}}
-resultPreview.style.display="block";
+selectResultCard(selectedCardVersion);resultPreview.style.display="block";
 }
+chooseCard01.addEventListener("click",()=>selectResultCard("01"));chooseCard02.addEventListener("click",()=>selectResultCard("02"));
 
 canvas.addEventListener("pointerup",endDrag,{passive:false});
 canvas.addEventListener("pointercancel",()=>{
@@ -261,7 +254,18 @@ hud();draw();
 leaderForm.addEventListener("submit",submitLeaderboardScore);
 document.getElementById("refreshLeaderboard").addEventListener("click",loadLeaderboard);
 
+async function resultBlobV2(){
+let art=new Image();art.src="./pepecoin-card-02.png";if(!art.complete||!art.naturalWidth)await new Promise((resolve,reject)=>{art.addEventListener("load",resolve,{once:true});art.addEventListener("error",()=>reject(Error("Card 02 artwork unavailable")),{once:true});});
+let out=document.createElement("canvas");out.width=1200;out.height=800;let c=out.getContext("2d");if(!c)throw Error("Canvas unavailable");c.drawImage(art,0,0,1200,800);
+const round=(x,y,w,h,r)=>{c.beginPath();c.roundRect(x,y,w,h,r);};
+c.fillStyle="#06184def";c.strokeStyle="#f3d23e";c.lineWidth=5;round(650,24,520,270,28);c.fill();c.stroke();c.textAlign="center";c.textBaseline="middle";c.fillStyle="#fff";c.font="900 25px system-ui";c.fillText("02   PEPECOIN RESCUE CHALLENGE",910,58);
+c.fillStyle="#ffe23d";c.font="italic 1000 42px system-ui";c.fillText("MISSION COMPLETE!",910,108);c.fillStyle="#f5d43e";round(700,132,420,42,15);c.fill();c.fillStyle="#0a205f";c.font="950 26px system-ui";c.fillText("100 PEPECOINS RESCUED",910,154);
+c.fillStyle="#fff";c.font="1000 76px system-ui";c.fillText(fmt(finishAt!==null&&startAt!==null?finishAt-startAt:elapsed()),910,218);c.font="850 23px system-ui";c.fillText("YOUR RESCUE TIME",910,254);c.strokeStyle="#f5d43e";c.lineWidth=3;round(765,270,290,42,20);c.stroke();c.font="800 22px system-ui";c.fillText("Best time: "+(best===null?"—":fmt(best)),910,291);
+c.fillStyle="#061d49ed";c.strokeStyle="#e1bd43";c.lineWidth=4;round(135,744,930,40,22);c.fill();c.stroke();c.font="850 23px system-ui";c.fillStyle="#ffe23d";c.textAlign="left";c.fillText("Can you beat my time?",170,765);c.fillStyle="#fff";c.fillText("|  "+location.host,475,765);
+return new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(Error("PNG export failed")),"image/png"));
+}
 async function resultBlob(){
+if(selectedCardVersion==="02")return resultBlobV2();
 if(!pepecoinIcon.complete||!pepecoinIcon.naturalWidth)await new Promise((resolve,reject)=>{pepecoinIcon.addEventListener("load",resolve,{once:true});pepecoinIcon.addEventListener("error",()=>reject(Error("Pepecoin icon unavailable")),{once:true});});
 let out=document.createElement("canvas");out.width=1200;out.height=800;
 let c=out.getContext("2d");if(!c)throw Error("Canvas unavailable");
